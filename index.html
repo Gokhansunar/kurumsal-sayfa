@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Özlem Turgut Sunar · Ev tekstili ve dekorasyon</title>
+<meta name="description" content="Doğal jüt amerikan servis ve supla setleri, dekoratif mumlar. Ürünlerimiz Trendyol mağazamızda.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --yesil:#41695B; --kiremit:#A4502F; --krem:#F3F1E6; --metin:#2B2B26; --soluk:#6B6A60; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--krem); color:var(--metin); font:400 17px/1.6 Barlow, system-ui, sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:64px 20px 48px; }
+  h1 { font:500 clamp(30px,6vw,40px)/1.15 Fraunces, Georgia, serif; margin:0 0 6px; color:var(--yesil); }
+  .alt { color:var(--soluk); margin:0 0 32px; }
+  p { margin:0 0 16px; }
+  .dugme { display:inline-block; margin:8px 0 40px; padding:12px 22px; border-radius:8px; background:var(--yesil); color:#fff; text-decoration:none; font-weight:500; }
+  .dugme:hover { background:#36584C; }
+  h2 { font:500 20px/1.3 Fraunces, Georgia, serif; margin:0 0 12px; color:var(--kiremit); }
+  dl { margin:0; display:grid; grid-template-columns:max-content 1fr; gap:6px 18px; }
+  dt { color:var(--soluk); }
+  dd { margin:0; }
+  a { color:var(--yesil); }
+  .form { display:grid; gap:14px; }
+  .form label { display:grid; gap:4px; color:var(--soluk); font-size:15px; }
+  .form input, .form textarea { font:inherit; color:var(--metin); padding:10px 12px; border:1px solid #CFCAB4; border-radius:8px; background:#FBFAF5; }
+  .form input:focus, .form textarea:focus { outline:2px solid var(--yesil); outline-offset:1px; }
+  .form .dugme { margin:0; border:0; cursor:pointer; justify-self:start; font:inherit; font-weight:500; }
+  .kvkk { font-size:13px; color:var(--soluk); margin:0; }
+  footer { margin-top:48px; padding-top:16px; border-top:1px solid #DDD9C8; color:var(--soluk); font-size:14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Özlem Turgut Sunar</h1>
+  <p class="alt">Ev tekstili ve dekorasyon ürünleri · İstanbul</p>
+
+  <p>Doğal jüt amerikan servis ve supla setleri ile dekoratif mumlar satıyoruz. Ürünlerimizi Trendyol mağazamızdan satın alabilirsiniz.</p>
+  <a class="dugme" href="https://www.trendyol.com/magaza/m-m-473058">Trendyol mağazamız</a>
+
+  <h2>İletişim</h2>
+  <dl>
+    <dt>Unvan</dt><dd>Özlem Turgut Sunar (şahıs işletmesi)</dd>
+    <dt>E-posta</dt><dd><a href="mailto:mychakrahome@gmail.com">mychakrahome@gmail.com</a></dd>
+    <dt>Adres</dt><dd>Sancaktepe, İstanbul</dd>
+  </dl>
+
+  <h2 style="margin-top:36px">Bize yazın</h2>
+  <form class="form" action="https://formsubmit.co/mychakrahome@gmail.com" method="POST">
+    <input type="hidden" name="_subject" value="Siteden yeni mesaj">
+    <input type="hidden" name="_template" value="table">
+    <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
+    <label>Adınız<input type="text" name="Ad" required autocomplete="name"></label>
+    <label>E-posta adresiniz<input type="email" name="E-posta" required autocomplete="email"></label>
+    <label>Mesajınız<textarea name="Mesaj" rows="5" required></textarea></label>
+    <p class="kvkk">Gönderdiğiniz ad, e-posta ve mesaj yalnızca size yanıt vermek için kullanılır. Mesajınız FormSubmit hizmeti aracılığıyla e-postamıza iletilir.</p>
+    <button type="submit" class="dugme">Gönder</button>
+  </form>
+
+  <footer>© 2026 Özlem Turgut Sunar</footer>
+</main>
+</body>
+</html>
