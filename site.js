@@ -96,6 +96,8 @@
     }
   }
   sec("tarcin");
+  // Reklamdan gelen bağlantıda ?renk=gold gibi bir renk varsa o renk seçili açılır.
+  try { var ilkRenk = new URLSearchParams(location.search).get("renk"); if (ilkRenk && JUT[ilkRenk]) sec(ilkRenk); } catch (e) {}
   dugmeler.forEach(function (d) { d.addEventListener("click", function () { sec(d.getAttribute("data-renk")); }); });
   Array.prototype.forEach.call(document.querySelectorAll("[data-renk-sec]"), function (a) {
     a.addEventListener("click", function () { sec(a.getAttribute("data-renk-sec")); });
