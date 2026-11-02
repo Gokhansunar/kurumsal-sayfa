@@ -1,24 +1,59 @@
-"""Türkçe index.html'den İngilizce en/index.html üretir.
+"""Türkçe index.html'den İngilizce en/index.html üretir; iki sayfanın SSS yapılandırılmış verisini de yeniler.
 
 Kullanım: python3 en_yap.py   (site klasöründe)
 Her çeviri satırı Türkçe sayfada beklenen sayıda geçmezse durur; Türkçe metin
-değişince buradaki karşılığı da güncellenmeli.
+değişince buradaki karşılığı da güncellenmeli. SSS verisi (FAQPage JSON-LD)
+sayfadaki <details> sorularından üretilir, elle yazılmaz.
 """
+import html
+import json
 import os
+import re
 import sys
 
 KOK = os.path.dirname(os.path.abspath(__file__))
-s = open(os.path.join(KOK, "index.html"), encoding="utf-8").read()
+SITE = "https://mychakrahome.com.tr/"
+VERI_BAS = '<script type="application/ld+json" id="sss-veri">'
+
+
+def sss_verisi(sayfa, url, dil):
+    bolum = re.search(r'<section class="sss".*?</section>', sayfa, re.S).group(0)
+    ciftler = re.findall(r"<details(?: open)?>\s*<summary>(.*?)</summary>\s*<p>(.*?)</p>\s*</details>", bolum, re.S)
+    if not ciftler:
+        sys.exit("SSS bulunamadı")
+
+    def duz(x):
+        return html.unescape(re.sub(r"<[^>]+>", "", x)).strip()
+
+    veri = {"@context": "https://schema.org", "@type": "FAQPage", "url": url, "inLanguage": dil,
+            "mainEntity": [{"@type": "Question", "name": duz(q), "acceptedAnswer": {"@type": "Answer", "text": duz(a)}}
+                           for q, a in ciftler]}
+    return VERI_BAS + json.dumps(veri, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/") + "</script>"
+
+
+def veri_cikar(sayfa):
+    return re.sub(re.escape(VERI_BAS) + r".*?</script>\n", "", sayfa, flags=re.S)
+
+
+def veri_koy(sayfa, url, dil):
+    return sayfa.replace("</head>", sss_verisi(sayfa, url, dil) + "\n</head>", 1)
+
+
+s = veri_cikar(open(os.path.join(KOK, "index.html"), encoding="utf-8").read())
+open(os.path.join(KOK, "index.html"), "w", encoding="utf-8").write(veri_koy(s, SITE, "tr"))
 
 # (Türkçe, İngilizce, kaç kez geçmeli)
 CEVIRI = [
     ('<html lang="tr">', '<html lang="en">', 1),
-    ('<title>Elle örülmüş jüt amerikan servisler ve mumlar</title>', '<title>Handwoven jute placemats and candles</title>', 1),
+    ('<title>Jüt amerikan servis ve bardak altlığı setleri · Elle örülmüş</title>', '<title>Handwoven round jute placemat and coaster sets</title>', 1),
     ('content="Yuvarlak, elle örülmüş jüt amerikan servisler ve aynı renkte bardak altlıkları; toprak çömlekte kokulu mumlar ve çakıl taşı mumlar. Dört renk, 2\'li, 4\'lü ve 6\'lı setler. Satın alma Trendyol mağazamızda."',
      'content="Round, handwoven jute placemats with matching coasters; scented candles in terracotta pots and pebble candles. Four colours, sets for 2, 4 and 6. Available in our Trendyol store."', 1),
-    ('<meta property="og:title" content="Elle örülmüş jüt amerikan servisler ve mumlar">', '<meta property="og:title" content="Handwoven jute placemats and candles">', 1),
+    ('<meta property="og:url" content="https://mychakrahome.com.tr/">', '<meta property="og:url" content="https://mychakrahome.com.tr/en/">', 1),
+    ('<meta property="og:title" content="Jüt amerikan servis ve bardak altlığı setleri · Elle örülmüş">', '<meta property="og:title" content="Handwoven round jute placemat and coaster sets">', 1),
     ('<meta property="og:description" content="Dört renk, 2\'li, 4\'lü ve 6\'lı setler. Satın alma Trendyol mağazamızda.">', '<meta property="og:description" content="Four colours, sets for 2, 4 and 6. Available in our Trendyol store.">', 1),
+    ('<meta property="og:image:alt" content="Mum ışığında ahşap masada tarçın kenarlı yuvarlak jüt servisler ve bardak altlıkları">', '<meta property="og:image:alt" content="Cinnamon-edged round jute placemats and coasters on a candlelit wooden table">', 1),
     ('<meta property="og:locale" content="tr_TR">', '<meta property="og:locale" content="en_GB">', 1),
+    ('<meta property="og:locale:alternate" content="en_GB">', '<meta property="og:locale:alternate" content="tr_TR">', 1),
     ('<link rel="canonical" href="https://mychakrahome.com.tr/">', '<link rel="canonical" href="https://mychakrahome.com.tr/en/">', 1),
     ('href="favicon.svg"', 'href="../favicon.svg"', 1),
     ('href="stil.css"', 'href="../stil.css"', 1),
@@ -37,7 +72,7 @@ CEVIRI = [
     ('>Sıkça sorulanlar<', '>FAQ<', 4),
     ('>İletişim<', '>Contact<', 4),
     ('<p class="etiket">Doğal jüt · Elle örülür</p>', '<p class="etiket">Natural jute · Handwoven</p>', 1),
-    ('Sofranız için <em>elle örülmüş</em> jüt.', '<em>Handwoven</em> jute for your table.', 1),
+    ('Sofranız için <em>elle örülmüş</em> jüt amerikan servisler.', '<em>Handwoven</em> jute placemats for your table.', 1),
     ('Yuvarlak amerikan servisler ve aynı renkte bardak altlıkları. Dört kenar rengi; iki, dört ve altı kişilik setler.', 'Round placemats with matching coasters. Four colours; sets for two, four and six.', 1),
     ('>Setleri inceleyin<', '>Explore the sets<', 1),
     ('<a class="yazi-bag" href="#mumlar">Mumlar <svg', '<a class="yazi-bag" href="#mumlar">Candles <svg', 1),
@@ -130,6 +165,9 @@ CEVIRI = [
     ('<summary>Setlerde neler var?</summary>', '<summary>What is in a set?</summary>', 1),
     ("<p>Her sette servis kadar bardak altlığı var. Örneğin 4'lü sette 4 yuvarlak jüt amerikan servis ve aynı renkte 4 bardak altlığı, toplam 8 parça.</p>",
      '<p>One coaster per placemat. The set of 4, for example, has 4 round jute placemats and 4 coasters in the same colour, 8 pieces in all.</p>', 1),
+    ('<summary>Hangi renkler var?</summary>', '<summary>Which colours are there?</summary>', 1),
+    ("<p>Dört renk: Tarçın (kiremit tonunda halat kenar), Hardal (hardal sarısı halat kenar), Gold (jüt ve altın iplikten balıksırtı örgü) ve Doğal (jütün kendi tonu). Her renk 2'li, 4'lü ve 6'lı sette var. Jüt doğal bir lif olduğu ve servisler elle örüldüğü için ton parçadan parçaya biraz farklı olabilir.</p>",
+     "<p>Four colours: Cinnamon (terracotta rope edge), Mustard (mustard-yellow rope edge), Gold (herringbone braid of jute and gold thread) and Natural (the jute's own tone). Each colour comes in sets of 2, 4 and 6. Jute is a natural fibre and every placemat is woven by hand, so the tone may vary slightly from piece to piece.</p>", 1),
     ('<summary>Servislerin ölçüsü ne?</summary>', '<summary>How big are the placemats?</summary>', 1),
     ('<p>Tarçın ve Gold servisler yaklaşık 36×34 cm, Hardal ve Doğal yaklaşık 35 cm; bardak altlıkları yaklaşık 9×9 cm. El yapımı olduğu için küçük farklar olabilir.</p>',
      '<p>Cinnamon and Gold placemats are about 36×34 cm, Mustard and Natural about 35 cm; coasters are about 9×9 cm. Being handmade, sizes may vary slightly.</p>', 1),
@@ -138,6 +176,15 @@ CEVIRI = [
      '<p>Not directly. Put a trivet under hot teapots and pans, and use burning candles on a holder or plate.</p>', 1),
     ('<summary>Nasıl saklanır?</summary>', '<summary>How do I store them?</summary>', 1),
     ('<p>Kullanmadığınızda rulo yapıp kuru bir çekmecede saklayabilirsiniz.</p>', '<p>Roll them up and keep them in a dry drawer when not in use.</p>', 1),
+    ('<summary>Mumlar kaç saat yanar?</summary>', '<summary>How long do the candles burn?</summary>', 1),
+    ('<p>Üreticinin verdiği bilgiye göre toprak çömlekteki mumlar küçük boyda yaklaşık 20, orta boyda 30, büyük boyda 40 saat; çakıl taşı mum yaklaşık 30 saat yanar. Süre kullanıma göre değişebilir.</p>',
+     '<p>According to the maker, the candles in terracotta pots burn for about 20 hours (small), 30 hours (medium) and 40 hours (large); the pebble candle burns for about 30 hours. Burn time may vary with use.</p>', 1),
+    ('<summary>Hediye olarak gönderebilir miyim?</summary>', '<summary>Can I send one as a gift?</summary>', 1),
+    ("<p>Evet. Trendyol'da siparişi verirken teslimat adresine hediye edeceğiniz kişinin adını ve adresini yazmanız yeterli.</p>",
+     "<p>Yes. When you order on Trendyol, simply enter the recipient's name and address as the delivery address.</p>", 1),
+    ('<summary>Kargo ve iade nasıl işliyor?</summary>', '<summary>How do delivery and returns work?</summary>', 1),
+    ("<p>Siparişler Trendyol üzerinden kargoya verilir; tahmini kargoya veriliş süresi her ürünün Trendyol sayfasında yazar. İade, Trendyol'un koşullarıyla Trendyol'daki sipariş sayfanızdan yapılır.</p>",
+     "<p>Orders are shipped through Trendyol; the estimated dispatch time is shown on each product's Trendyol page. Returns follow Trendyol's terms and are made from your order page on Trendyol.</p>", 1),
     ('Bize yazın.', 'Write to us.', 1),
     ("<p>Ürünler, toplu sipariş ya da iş birliği için formu doldurun; e-postayla dönüş yapalım. Sipariş, kargo ve iade sorularınızı Trendyol'daki sipariş sayfanızdan da iletebilirsiniz.</p>",
      '<p>For questions about our products, bulk orders or collaborations, fill in the form and we will reply by email. Questions about an order, delivery or a return can also be sent from your order page on Trendyol.</p>', 1),
@@ -171,5 +218,5 @@ if hata:
     sys.exit(1)
 
 os.makedirs(os.path.join(KOK, "en"), exist_ok=True)
-open(os.path.join(KOK, "en", "index.html"), "w", encoding="utf-8").write(s)
-print("en/index.html yazıldı")
+open(os.path.join(KOK, "en", "index.html"), "w", encoding="utf-8").write(veri_koy(s, SITE + "en/", "en"))
+print("en/index.html yazıldı; SSS verisi iki sayfada yenilendi")
