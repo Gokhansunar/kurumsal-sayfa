@@ -103,6 +103,8 @@
   // Reklamdan gelen bağlantıda ?renk=gold gibi bir renk varsa o renk seçili açılır.
   var ilkRenk = null;
   try { ilkRenk = new URLSearchParams(location.search).get("renk"); if (ilkRenk && JUT[ilkRenk]) sec(ilkRenk); else ilkRenk = null; } catch (e) { ilkRenk = null; }
+  // Reklamdan renkle gelen ziyaretçi doğrudan renk bölümünü görsün (reklam bağlantılarına #renk eklenmiyor, TikTok utm ekliyor).
+  if (ilkRenk && !location.hash) window.addEventListener("load", function () { var r = document.getElementById("renk"); if (r) r.scrollIntoView(); });
   dugmeler.forEach(function (d) { d.addEventListener("click", function () { sec(d.getAttribute("data-renk")); izle(d.getAttribute("data-renk")); }); });
   Array.prototype.forEach.call(document.querySelectorAll("[data-renk-sec]"), function (a) {
     a.addEventListener("click", function () { sec(a.getAttribute("data-renk-sec")); izle(a.getAttribute("data-renk-sec")); });
