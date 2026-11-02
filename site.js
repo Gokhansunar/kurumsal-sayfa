@@ -95,12 +95,17 @@
       }
     }
   }
+  // Ürün görme (TikTok ViewContent): yalnızca ziyaretçi bir renk seçince ya da reklamdan renkle gelince; piksel onayla yüklüyse.
+  function izle(anahtar) {
+    if (window.ttq && window.ttq.track && JUT[anahtar]) window.ttq.track("ViewContent", { contents: [{ content_id: "jut-" + anahtar, content_type: "product_group", content_name: JUT[anahtar].ad }] });
+  }
   sec("tarcin");
   // Reklamdan gelen bağlantıda ?renk=gold gibi bir renk varsa o renk seçili açılır.
-  try { var ilkRenk = new URLSearchParams(location.search).get("renk"); if (ilkRenk && JUT[ilkRenk]) sec(ilkRenk); } catch (e) {}
-  dugmeler.forEach(function (d) { d.addEventListener("click", function () { sec(d.getAttribute("data-renk")); }); });
+  var ilkRenk = null;
+  try { ilkRenk = new URLSearchParams(location.search).get("renk"); if (ilkRenk && JUT[ilkRenk]) sec(ilkRenk); else ilkRenk = null; } catch (e) { ilkRenk = null; }
+  dugmeler.forEach(function (d) { d.addEventListener("click", function () { sec(d.getAttribute("data-renk")); izle(d.getAttribute("data-renk")); }); });
   Array.prototype.forEach.call(document.querySelectorAll("[data-renk-sec]"), function (a) {
-    a.addEventListener("click", function () { sec(a.getAttribute("data-renk-sec")); });
+    a.addEventListener("click", function () { sec(a.getAttribute("data-renk-sec")); izle(a.getAttribute("data-renk-sec")); });
   });
 
   var menuDugme = document.getElementById("menuDugme");
@@ -151,7 +156,7 @@
   });
   if (GA_ID || TT_ID) {
     var secim = oku();
-    if (secim === "evet") olcumYukle();
+    if (secim === "evet") { olcumYukle(); if (ilkRenk) izle(ilkRenk); }
     else if (secim !== "hayir") {
       var bant = document.createElement("div");
       bant.className = "cerez";
@@ -161,7 +166,7 @@
       p.textContent = t("Hangi ürünlerin ilgi gördüğünü ve reklamlarımızın işe yarayıp yaramadığını anlamak için ölçüm çerezleri (Google Analytics ve TikTok pikseli) kullanmak istiyoruz. Kabul etmezseniz çerez kullanılmaz.", "We would like to use measurement cookies (Google Analytics and the TikTok pixel) to see which products people are interested in and whether our ads work. If you decline, no cookies are used.");
       var evet = document.createElement("button"); evet.type = "button"; evet.className = "dugme ince"; evet.textContent = t("Kabul et", "Accept");
       var hayir = document.createElement("button"); hayir.type = "button"; hayir.className = "dugme ince cerceve"; hayir.textContent = t("Reddet", "Decline");
-      evet.addEventListener("click", function () { yaz("evet"); bant.remove(); olcumYukle(); });
+      evet.addEventListener("click", function () { yaz("evet"); bant.remove(); olcumYukle(); if (ilkRenk) izle(ilkRenk); });
       hayir.addEventListener("click", function () { yaz("hayir"); bant.remove(); });
       var d = document.createElement("div"); d.className = "cerez-dugmeler"; d.appendChild(hayir); d.appendChild(evet);
       bant.appendChild(p); bant.appendChild(d);
